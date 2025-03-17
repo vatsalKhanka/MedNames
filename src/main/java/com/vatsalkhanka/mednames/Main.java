@@ -13,10 +13,10 @@ public class Main {
         String medicine = new Scanner(System.in).next();
 
         //Read medicine database
-        searchMedicine("C:/Users/cyno/IdeaProjects/MedNames/src/main/resources/meddb.csv", medicine);
+        readFile("C:/Users/cyno/IdeaProjects/MedNames/src/main/resources/meddb.csv", medicine);
     }
 
-    public static void searchMedicine(String file, String medicine) {
+    public static void readFile(String file, String medicine) {
         try {
             FileReader fileReader = new FileReader(file);
 

@@ -9,8 +9,10 @@ import java.io.IOException;
 public class Main {
 
     public static void main(String[] args) {
+        //Window window = new Window();
         //Read user input
         String medicine = new Scanner(System.in).next();
+        //String medicine = window.getMedicineInput();
 
         //Read medicine database
         readFile("C:/Users/cyno/IdeaProjects/MedNames/src/main/resources/meddb.csv", medicine);
@@ -23,7 +25,7 @@ public class Main {
             CSVReader csvReader = new CSVReader(fileReader);
             String [] nextEntry;
 
-            System.out.println("Searching medicines! \n ---------------------------------------");
+            System.out.println("Searching medicines! \n --------------------------------------------------");
 
             //Iterate through medicines
             while ((nextEntry = csvReader.readNext()) != null) {

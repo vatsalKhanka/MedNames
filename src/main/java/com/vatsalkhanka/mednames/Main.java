@@ -1,10 +1,6 @@
 package com.vatsalkhanka.mednames;
 
-import com.opencsv.CSVReader;
 import java.util.*;
-
-import java.io.FileReader;
-import java.io.IOException;
 
 public class Main {
 

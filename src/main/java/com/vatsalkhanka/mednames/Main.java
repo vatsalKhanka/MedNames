@@ -5,10 +5,13 @@ import java.util.*;
 public class Main {
 
     public static void main(String[] args) {
+
+        new Window();
+
         //Read user input
-        System.out.println("Enter the generic name of your medicine: ");
+        /* System.out.println("Enter the generic name of your medicine: ");
         String medicine = new Scanner(System.in).next();
 
-        MedNames.searchMedicine(medicine);
+        MedNames.searchMedicine(medicine);*/
     }
 }

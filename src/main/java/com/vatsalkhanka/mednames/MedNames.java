@@ -12,10 +12,15 @@ import java.net.URLEncoder;
 
 public class MedNames {
 
-    public static void searchMedicine(String query) {
+    public static String output = "";
+
+    public static String searchMedicine(String query) {
+        output = "";
         if(!searchMedCSV(query)) {
             searchMedTata(query);
         }
+
+        return output;
     }
 
     public static void searchMedTata(String brandName) {
@@ -42,7 +47,7 @@ public class MedNames {
 
                 if (drugNameElement != null) {
                     String drugName = drugNameElement.text();
-                    System.out.println("NAME: " + drugName);
+                    output += "NAME: " + drugName + "\n";
                 } else {
                     System.out.println("Drug name not found!");
                 }
@@ -50,10 +55,10 @@ public class MedNames {
                 for (Element salt : salts) {
                     String saltName = salt.text();
 
-                    System.out.println("SALT COMPOSITION: " + saltName);
+                    output += "SALT COMPOSITION: " + saltName + "\n";
                 }
 
-                System.out.println("\n -------------------------------------------------- \n");
+                output += "\n -------------------------------------------------- \n";
             }
 
 
@@ -73,17 +78,17 @@ public class MedNames {
             CSVReader csvReader = new CSVReader(fileReader);
             String [] nextEntry;
 
-            System.out.println("Searching medicines! \n --------------------------------------------------");
+            output += "-------------------------------------------------- \n";
 
             //Iterate through medicines
             while ((nextEntry = csvReader.readNext()) != null) {
                 //Check name of medicines
                 if (nextEntry[1].toLowerCase().contains(medicine.toLowerCase())) {
                     resultsFound = true;
-                    System.out.println("NAME: " + nextEntry[1]); //Name
-                    System.out.println("SALT COMPOSITION: "+ nextEntry[7]); //Composition I
-                    System.out.println(nextEntry[8] + //Composition II
-                            "\n -------------------------------------------------- \n");
+                    output += "NAME: " + nextEntry[1] + "\n"; //Name
+                    output += "SALT COMPOSITION: "+ nextEntry[7] + "\n"; //Composition I
+                    output += nextEntry[8] + //Composition II
+                            "\n -------------------------------------------------- \n";
                 }
             }
         } catch (IOException e) {

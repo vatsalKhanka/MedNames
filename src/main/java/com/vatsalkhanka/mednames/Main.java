@@ -1,6 +1,8 @@
 package com.vatsalkhanka.mednames;
 
 import com.opencsv.CSVReader;
+
+import java.sql.SQLOutput;
 import java.util.*;
 
 import java.io.FileReader;
@@ -11,11 +13,13 @@ public class Main {
     public static void main(String[] args) {
         //Window window = new Window();
         //Read user input
+        System.out.println("Enter the generic name of your medicine: ");
         String medicine = new Scanner(System.in).next();
         //String medicine = window.getMedicineInput();
 
         //Read medicine database
-        readFile("C:/Users/cyno/IdeaProjects/MedNames/src/main/resources/meddb.csv", medicine);
+        readFile("src/main/resources/meddb.csv", medicine);
+        new Scraper().getMedicineNames(medicine);
     }
 
     public static void readFile(String file, String medicine) {
@@ -32,7 +36,6 @@ public class Main {
                 //Check name of medicine
                 if (nextEntry[1].toLowerCase().contains(medicine.toLowerCase())) {
                     System.out.println("NAME: " + nextEntry[1]); //Name
-                    System.out.println("PRICE: Rs." + nextEntry[2]); //Price
                     System.out.println("SALT COMPOSITION: "+ nextEntry[7]); //Composition I
                     System.out.println(nextEntry[8] + //Composition II
                             "\n -------------------------------------------------- \n");

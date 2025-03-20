@@ -1,7 +1,11 @@
 package com.vatsalkhanka.mednames;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 public class Window extends JFrame {
 
@@ -9,6 +13,7 @@ public class Window extends JFrame {
     JPanel panel;
     JTextArea results;
     JScrollPane scrollPane;
+    Timer debounceTimer;
 
     public Window() {
         initGUI();
@@ -23,15 +28,24 @@ public class Window extends JFrame {
 
         inputArea = new JTextField();
         inputArea.setVisible(true);
-        inputArea.setColumns(50);
+        inputArea.setColumns(30);
         getContentPane().add(inputArea);
 
         results = new JTextArea("Results display here!");
-        results.setColumns(75);
+        results.setColumns(50);
         results.setRows(20);
         results.setEditable(false);
+        results.setOpaque(false);
 
-        panel = new JPanel();
+        panel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                ImageIcon bgIcon = new ImageIcon("src/main/resources/bg.png");
+                g.drawImage(bgIcon.getImage(), 0, 0, getWidth(), getHeight(), this);
+            }
+        };
+
         panel.add(inputArea);
 
         setFocusable(true);
@@ -39,25 +53,35 @@ public class Window extends JFrame {
 
         scrollPane = new JScrollPane(results);
         getContentPane().add(scrollPane);
+        results.setOpaque(false);
+        scrollPane.getViewport().setOpaque(false);
+        scrollPane.setOpaque(false);
         panel.add(scrollPane);
 
         add(panel);
         setVisible(true);
 
-        InputMap inputMap = this.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-        ActionMap actionMap = this.getRootPane().getActionMap();
-
-        Action enterAction = new AbstractAction() {
+        debounceTimer = new Timer(1000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                int caretPosition = results.getCaretPosition();
                 results.setText(MedNames.searchMedicine(inputArea.getText()));
+                results.setCaretPosition(caretPosition);
+                stopDebounce();
             }
-        };
+        });
 
-        inputMap.put(KeyStroke.getKeyStroke("ENTER"), "enterPressed");
-        actionMap.put("enterPressed", enterAction);
-
+        // Reset the timer on every keystroke
+        inputArea.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                debounceTimer.restart();  // Restart the timer every time a key is typed
+            }
+        });
     }
 
+    void stopDebounce() {
+        debounceTimer.stop();
+    }
 
 }

@@ -19,6 +19,7 @@ public class MedNames {
     public static final int MAX_SEARCHES = 30;
     public static LevenshteinDistance distance = new LevenshteinDistance();
 
+
     public static String searchMedicine(String query) {
         output = "";
         if(!searchMedCSV(query)) {
@@ -97,14 +98,12 @@ public class MedNames {
                 if (isValidLevenshtein(result[1].substring(0,endLength).toLowerCase(), medicine.toLowerCase())) {
                     resultsFound = true;
                     resultsCount++;
-
                     output += "NAME: " + result[1] +"\n"; //Name
                     output += "SALT COMPOSITION: "+ result[7]; //Composition I
                     output += "," + result[8]+//Composition II
                             "\n \n ---------------------------------------------------------------------------------------------------- \n";
 
                     if(resultsCount == MAX_SEARCHES) return true;
-
                 }
             }
 

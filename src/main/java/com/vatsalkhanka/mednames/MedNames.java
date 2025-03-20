@@ -1,6 +1,7 @@
 package com.vatsalkhanka.mednames;
 
 import com.opencsv.CSVReader;
+import org.apache.commons.text.similarity.LevenshteinDistance;
 import org.jsoup.nodes.Document;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
@@ -9,15 +10,19 @@ import org.jsoup.select.Elements;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.Comparator;
+import java.util.List;
 
 public class MedNames {
 
     public static String output = "";
+    public static final int MAX_SEARCHES = 30;
+    public static LevenshteinDistance distance = new LevenshteinDistance();
 
     public static String searchMedicine(String query) {
         output = "";
         if(!searchMedCSV(query)) {
-            searchMedTata(query);
+            output = "No medicines were found by the name \"" + query + "\". Did you make a typo?";
         }
 
         return output;
@@ -34,7 +39,8 @@ public class MedNames {
             Elements links = searchPage.select("a[href^='/drugs/']");
 
             //Iterate through all links
-            for (Element link : links) {
+            for (int i = 0; i < Math.clamp(links.size(), 0, MAX_SEARCHES); i++) {
+                Element link = links.get(i);
                 String relativeUrl = link.attr("href");
                 String fullUrl = "https://www.1mg.com" + relativeUrl;
 
@@ -58,7 +64,7 @@ public class MedNames {
                     output += "SALT COMPOSITION: " + saltName + "\n";
                 }
 
-                output += "\n -------------------------------------------------- \n";
+                output += "\n --------------------------------------------------------------------------- \n";
             }
 
 
@@ -69,32 +75,47 @@ public class MedNames {
 
 
     public static boolean searchMedCSV(String medicine) {
-
         boolean resultsFound = false;
+        int resultsCount = 0;
 
         try {
             FileReader fileReader = new FileReader("src/main/resources/meddb.csv");
 
             CSVReader csvReader = new CSVReader(fileReader);
-            String [] nextEntry;
 
-            output += "-------------------------------------------------- \n";
+            List<String[]> results = csvReader.readAll();
+            results.sort(Comparator.comparingInt(entry -> distance.apply(medicine.toLowerCase(), entry[1].toLowerCase().substring(0,Math.min(entry[1].length()-1, medicine.length())))));
 
-            //Iterate through medicines
-            while ((nextEntry = csvReader.readNext()) != null) {
-                //Check name of medicines
-                if (nextEntry[1].toLowerCase().contains(medicine.toLowerCase())) {
+            output += "---------------------------------------------------------------------------------------------------- \n";
+
+            for(String [] result : results) {
+                if(result[1].contains("name")) continue;
+
+                int endLength = medicine.length();
+                if(endLength >= result[1].length()) endLength = result[1].length()-1;
+
+                if (isValidLevenshtein(result[1].substring(0,endLength).toLowerCase(), medicine.toLowerCase())) {
                     resultsFound = true;
-                    output += "NAME: " + nextEntry[1] + "\n"; //Name
-                    output += "SALT COMPOSITION: "+ nextEntry[7] + "\n"; //Composition I
-                    output += nextEntry[8] + //Composition II
-                            "\n -------------------------------------------------- \n";
+                    resultsCount++;
+
+                    output += "NAME: " + result[1] +"\n"; //Name
+                    output += "SALT COMPOSITION: "+ result[7]; //Composition I
+                    output += "," + result[8]+//Composition II
+                            "\n \n ---------------------------------------------------------------------------------------------------- \n";
+
+                    if(resultsCount == MAX_SEARCHES) return true;
+
                 }
             }
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
         return resultsFound;
+    }
+
+    public static boolean isValidLevenshtein(String str1, String str2) {
+        return distance.apply(str1, str2) <= Math.max(1, str2.length()/5);
     }
 }

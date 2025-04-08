@@ -25,6 +25,7 @@ public class Window extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(0,0,711,400);
         setTitle("MedNames");
+        setIconImage(new ImageIcon(getClass().getClassLoader().getResource("icon.png")).getImage());
 
         inputArea = new JTextField();
         inputArea.setVisible(true);
@@ -41,8 +42,8 @@ public class Window extends JFrame {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                ImageIcon bgIcon = new ImageIcon("src/main/resources/bg.png");
-                g.drawImage(bgIcon.getImage(), 0, 0, getWidth(), getHeight(), this);
+                ImageIcon bgImage = new ImageIcon(getClass().getClassLoader().getResource("bg.png"));
+                g.drawImage(bgImage.getImage(), 0, 0, getWidth(), getHeight(), this);
             }
         };
 

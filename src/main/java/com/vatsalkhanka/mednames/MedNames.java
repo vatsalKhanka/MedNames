@@ -7,8 +7,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.net.URLEncoder;
 import java.util.Comparator;
 import java.util.List;
@@ -80,12 +79,17 @@ public class MedNames {
         int resultsCount = 0;
 
         try {
-            FileReader fileReader = new FileReader("src/main/resources/meddb.csv");
+            InputStream inputStream = MedNames.class.getClassLoader().getResourceAsStream("meddb.csv");
+            if (inputStream == null) {
+                throw new FileNotFoundException("meddb.csv not found in resources!");
+            }
 
-            CSVReader csvReader = new CSVReader(fileReader);
+            InputStreamReader reader = new InputStreamReader(inputStream);
+            CSVReader csvReader = new CSVReader(reader);
+
 
             List<String[]> results = csvReader.readAll();
-            results.sort(Comparator.comparingInt(entry -> distance.apply(medicine.toLowerCase(), entry[1].toLowerCase().substring(0,Math.min(entry[1].length()-1, medicine.length())))));
+        results.sort(Comparator.comparingInt(entry -> distance.apply(medicine.toLowerCase(), entry[1].toLowerCase().substring(0,Math.min(entry[1].length()-1, medicine.length()))) + 2*distance.apply(String.valueOf(medicine.toLowerCase().charAt(0)), String.valueOf(entry[1].toLowerCase().charAt(0)))));
 
             output += "---------------------------------------------------------------------------------------------------- \n";
 
@@ -115,6 +119,6 @@ public class MedNames {
     }
 
     public static boolean isValidLevenshtein(String str1, String str2) {
-        return distance.apply(str1, str2) <= Math.max(1, str2.length()/5);
+        return distance.apply(str1, str2) <= Math.max(1, str2.length()/3);
     }
 }

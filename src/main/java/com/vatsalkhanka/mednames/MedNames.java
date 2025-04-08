@@ -1,14 +1,10 @@
 package com.vatsalkhanka.mednames;
 
 import com.opencsv.CSVReader;
+import com.opencsv.CSVWriter;
 import org.apache.commons.text.similarity.LevenshteinDistance;
-import org.jsoup.nodes.Document;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 import java.io.*;
-import java.net.URLEncoder;
 import java.util.Comparator;
 import java.util.List;
 
@@ -27,52 +23,6 @@ public class MedNames {
 
         return output;
     }
-
-    public static void searchMedTata(String brandName) {
-        //Search Tata 1mg
-        String searchPageLink = "https://www.1mg.com/search/all?name=" + URLEncoder.encode(brandName);
-
-        try {
-            Document searchPage = Jsoup.connect(searchPageLink).get();
-
-            //Find links to all results
-            Elements links = searchPage.select("a[href^='/drugs/']");
-
-            //Iterate through all links
-            for (int i = 0; i < Math.clamp(links.size(), 0, MAX_SEARCHES); i++) {
-                Element link = links.get(i);
-                String relativeUrl = link.attr("href");
-                String fullUrl = "https://www.1mg.com" + relativeUrl;
-
-                //Connect to link
-                Document medPage = Jsoup.connect(fullUrl).get();
-
-                //Find medicine data
-                Elements salts = medPage.select("div.saltInfo.DrugHeader__meta-value___vqYM0 a[href]");
-                Element drugNameElement = medPage.selectFirst("h1.DrugHeader__title-content___2ZaPo");
-
-                if (drugNameElement != null) {
-                    String drugName = drugNameElement.text();
-                    output += "NAME: " + drugName + "\n";
-                } else {
-                    System.out.println("Drug name not found!");
-                }
-
-                for (Element salt : salts) {
-                    String saltName = salt.text();
-
-                    output += "SALT COMPOSITION: " + saltName + "\n";
-                }
-
-                output += "\n --------------------------------------------------------------------------- \n";
-            }
-
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
 
     public static boolean searchMedCSV(String medicine) {
         boolean resultsFound = false;
@@ -120,5 +70,19 @@ public class MedNames {
 
     public static boolean isValidLevenshtein(String str1, String str2) {
         return distance.apply(str1, str2) <= Math.max(1, str2.length()/3);
+    }
+
+    public static void addMed(String med, String salt) {
+        try {
+            CSVReader reader2 = new CSVReader(new InputStreamReader(MedNames.class.getClassLoader().getResourceAsStream("meddb.csv")));
+            List<String[]> allElements = reader2.readAll();
+            allElements.add(new String[]{"", med, "", "", "", "", "", salt, ""});
+            CSVWriter writr = new CSVWriter(new FileWriter("src/main/resources/meddb.csv"));
+            writr.writeAll(allElements);
+            writr.flush();
+            writr.close();
+        } catch (IOException e) {
+
+        }
     }
 }

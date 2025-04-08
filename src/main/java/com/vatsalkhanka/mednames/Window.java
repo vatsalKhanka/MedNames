@@ -14,6 +14,7 @@ public class Window extends JFrame {
     JTextArea results;
     JScrollPane scrollPane;
     Timer debounceTimer;
+    JButton addMedicine;
 
     public Window() {
         initGUI();
@@ -21,7 +22,7 @@ public class Window extends JFrame {
 
     private void initGUI() {
         setVisible(true);
-        setResizable(false);
+        //setResizable(false);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(0,0,711,400);
         setTitle("MedNames");
@@ -61,6 +62,27 @@ public class Window extends JFrame {
 
         add(panel);
         setVisible(true);
+
+        addMedicine = new JButton();
+        addMedicine.setText("Add new medicine");
+        add(addMedicine, BorderLayout.WEST);
+        addMedicine.setSize(100, 30);
+        addMedicine.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JTextField med = new JTextField();
+                JTextField salt = new JTextField();
+                Object[] message = {
+                        "Brand Name:", med,
+                        "Generic Salts:", salt
+                };
+
+                int option = JOptionPane.showConfirmDialog(null, message, "Enter the brand and generic names", JOptionPane.OK_CANCEL_OPTION);
+                if (option == JOptionPane.OK_OPTION) {
+                    MedNames.addMed(med.getText(), salt.getText());
+                }
+            }
+        });
 
         debounceTimer = new Timer(1000, new ActionListener() {
             @Override

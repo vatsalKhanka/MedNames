@@ -6,6 +6,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class Window extends JFrame {
 
@@ -19,6 +22,19 @@ public class Window extends JFrame {
 
     public Window() {
         initGUI();
+
+        File info = new File(System.getProperty("user.home") + "/MedNames/database/READ_THIS_BEFORE_CHANGING_THE_DATABASE.txt");
+        try {
+            if (info.createNewFile()) {
+                FileWriter writer = new FileWriter(System.getProperty("user.home") + "/MedNames/database/READ_THIS_BEFORE_CHANGING_THE_DATABASE.txt");
+                writer.write("This CSV file is the database that MedNames pulls information from. \n" +
+                        "You may add or delete entries either through the CSV file or through MedNames itself.\n" +
+                        "Note that if the database is deleted, MedNames will regenerate it, though any user-added entries will be lost.");
+                writer.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void initGUI() {

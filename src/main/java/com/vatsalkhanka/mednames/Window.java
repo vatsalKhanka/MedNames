@@ -9,6 +9,7 @@ import java.awt.event.KeyEvent;
 
 public class Window extends JFrame {
 
+    //Define GUI elements
     JTextField inputArea;
     JPanel panel;
     JTextArea results;
@@ -21,6 +22,7 @@ public class Window extends JFrame {
     }
 
     private void initGUI() {
+        //JFrame setup
         setVisible(true);
         setResizable(false);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -28,6 +30,7 @@ public class Window extends JFrame {
         setTitle("MedNames - by Vatsal Khanka");
         setIconImage(new ImageIcon(getClass().getClassLoader().getResource("icon.png")).getImage());
 
+        //Setting up GUI elements
         inputArea = new JTextField();
         inputArea.setVisible(true);
         inputArea.setColumns(30);
@@ -56,9 +59,10 @@ public class Window extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 JTextField med = new JTextField();
                 JTextField salt = new JTextField();
+                JLabel info = new JLabel("If there are multiple salts in the medicine, please separate them by commas");
                 Object[] message = {
                         "Brand Name:", med,
-                        "Generic Salts:", salt
+                        "Generic Salts:", salt, info
                 };
 
                 int option = JOptionPane.showConfirmDialog(null, message, "Enter the brand and generic names", JOptionPane.OK_CANCEL_OPTION);
@@ -68,7 +72,6 @@ public class Window extends JFrame {
             }
         });
 
-        addMedicine.setAlignmentX(FlowLayout.LEFT);
         panel.add(addMedicine, FlowLayout.LEFT);
 
         panel.add(inputArea);
@@ -115,8 +118,10 @@ public class Window extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 int caretPosition = results.getCaretPosition();
-                results.setText(MedNames.searchMedicine(inputArea.getText()));
-                results.setCaretPosition(caretPosition);
+                if(!inputArea.getText().isEmpty()) {
+                    results.setText(MedNames.searchMedicine(inputArea.getText()));
+                    results.setCaretPosition(caretPosition);
+                } else results.setText("Results display here!");
                 stopDebounce();
             }
         });

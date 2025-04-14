@@ -21,7 +21,7 @@ public class MedNames {
     public static int SEARCH_MODE = BRAND_TO_GEN;
     public static LevenshteinDistance distance = new LevenshteinDistance();
 
-
+    //Method to search medicines
     public static String searchMedicine(String query) {
         output = "";
         if(!searchMedCSV(query)) {
@@ -64,25 +64,29 @@ public class MedNames {
                     }
                 }
             } else {
-                results.sort(Comparator.comparingInt(entry -> distance.apply(medicine.toLowerCase(), entry[7].toLowerCase().substring(0, Math.min(entry[7].length() - 1, medicine.length()))) + 2 * distance.apply(String.valueOf(medicine.toLowerCase().charAt(0)), String.valueOf(entry[7].toLowerCase().charAt(0)))));
 
                 output += "---------------------------------------------------------------------------------------------------- \n";
 
                 for (String[] result : results) {
                     if (result[1].contains("name")) continue;
 
-                    int endLength = medicine.length();
-                    if (endLength >= result[7].length()) endLength = result[7].length() - 1;
+                    String[] medicinesToCompare = (result[7] + "," + result[8]).split(",");
 
-                    if (isValidLevenshtein(result[7].substring(0, endLength).toLowerCase(), medicine.toLowerCase())) {
-                        resultsFound = true;
-                        resultsCount++;
-                        output += "NAME: " + result[1] + "\n"; //Name
-                        output += "SALT COMPOSITION: " + result[7]; //Composition I
-                        output += "," + result[8] +//Composition II
-                                "\n \n ---------------------------------------------------------------------------------------------------- \n";
+                    for(String salt : medicinesToCompare) {
+                        int endLength = medicine.length();
+                        if (endLength >= salt.length()) endLength = salt.length() - 1;
 
-                        if (resultsCount == MAX_SEARCHES) return true;
+                        if (isValidLevenshtein(salt.substring(0, endLength).toLowerCase(), medicine.toLowerCase())) {
+                            resultsFound = true;
+                            resultsCount++;
+                            output += "NAME: " + result[1] + "\n"; //Name
+                            output += "SALT COMPOSITION: " + result[7]; //Composition I
+                            output += "," + result[8] +//Composition II
+                                    "\n \n ---------------------------------------------------------------------------------------------------- \n";
+
+                            if (resultsCount == MAX_SEARCHES) return true;
+                            break;
+                        }
                     }
                 }
             }

@@ -5,13 +5,20 @@ import com.opencsv.CSVWriter;
 import org.apache.commons.text.similarity.LevenshteinDistance;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.util.Comparator;
 import java.util.List;
 
 public class MedNames {
 
     public static String output = "";
+
     public static final int MAX_SEARCHES = 30;
+    public static final int BRAND_TO_GEN = 0;
+    public static final int GEN_TO_BRAND = 1;
+
+
+    public static int SEARCH_MODE = BRAND_TO_GEN;
     public static LevenshteinDistance distance = new LevenshteinDistance();
 
 
@@ -29,35 +36,54 @@ public class MedNames {
         int resultsCount = 0;
 
         try {
-            InputStream inputStream = MedNames.class.getClassLoader().getResourceAsStream("meddb.csv");
-            if (inputStream == null) {
-                throw new FileNotFoundException("meddb.csv not found in resources!");
-            }
 
-            InputStreamReader reader = new InputStreamReader(inputStream);
-            CSVReader csvReader = new CSVReader(reader);
-
+            CSVReader csvReader = new CSVReader(new FileReader(getOrCreateMedDB()));
 
             List<String[]> results = csvReader.readAll();
-        results.sort(Comparator.comparingInt(entry -> distance.apply(medicine.toLowerCase(), entry[1].toLowerCase().substring(0,Math.min(entry[1].length()-1, medicine.length()))) + 2*distance.apply(String.valueOf(medicine.toLowerCase().charAt(0)), String.valueOf(entry[1].toLowerCase().charAt(0)))));
 
-            output += "---------------------------------------------------------------------------------------------------- \n";
+            if(SEARCH_MODE == BRAND_TO_GEN) {
+                results.sort(Comparator.comparingInt(entry -> distance.apply(medicine.toLowerCase(), entry[1].toLowerCase().substring(0, Math.min(entry[1].length() - 1, medicine.length()))) + 2 * distance.apply(String.valueOf(medicine.toLowerCase().charAt(0)), String.valueOf(entry[1].toLowerCase().charAt(0)))));
 
-            for(String [] result : results) {
-                if(result[1].contains("name")) continue;
+                output += "---------------------------------------------------------------------------------------------------- \n";
 
-                int endLength = medicine.length();
-                if(endLength >= result[1].length()) endLength = result[1].length()-1;
+                for (String[] result : results) {
+                    if (result[1].contains("name")) continue;
 
-                if (isValidLevenshtein(result[1].substring(0,endLength).toLowerCase(), medicine.toLowerCase())) {
-                    resultsFound = true;
-                    resultsCount++;
-                    output += "NAME: " + result[1] +"\n"; //Name
-                    output += "SALT COMPOSITION: "+ result[7]; //Composition I
-                    output += "," + result[8]+//Composition II
-                            "\n \n ---------------------------------------------------------------------------------------------------- \n";
+                    int endLength = medicine.length();
+                    if (endLength >= result[1].length()) endLength = result[1].length() - 1;
 
-                    if(resultsCount == MAX_SEARCHES) return true;
+                    if (isValidLevenshtein(result[1].substring(0, endLength).toLowerCase(), medicine.toLowerCase())) {
+                        resultsFound = true;
+                        resultsCount++;
+                        output += "NAME: " + result[1] + "\n"; //Name
+                        output += "SALT COMPOSITION: " + result[7]; //Composition I
+                        output += "," + result[8] +//Composition II
+                                "\n \n ---------------------------------------------------------------------------------------------------- \n";
+
+                        if (resultsCount == MAX_SEARCHES) return true;
+                    }
+                }
+            } else {
+                results.sort(Comparator.comparingInt(entry -> distance.apply(medicine.toLowerCase(), entry[7].toLowerCase().substring(0, Math.min(entry[7].length() - 1, medicine.length()))) + 2 * distance.apply(String.valueOf(medicine.toLowerCase().charAt(0)), String.valueOf(entry[7].toLowerCase().charAt(0)))));
+
+                output += "---------------------------------------------------------------------------------------------------- \n";
+
+                for (String[] result : results) {
+                    if (result[1].contains("name")) continue;
+
+                    int endLength = medicine.length();
+                    if (endLength >= result[7].length()) endLength = result[7].length() - 1;
+
+                    if (isValidLevenshtein(result[7].substring(0, endLength).toLowerCase(), medicine.toLowerCase())) {
+                        resultsFound = true;
+                        resultsCount++;
+                        output += "NAME: " + result[1] + "\n"; //Name
+                        output += "SALT COMPOSITION: " + result[7]; //Composition I
+                        output += "," + result[8] +//Composition II
+                                "\n \n ---------------------------------------------------------------------------------------------------- \n";
+
+                        if (resultsCount == MAX_SEARCHES) return true;
+                    }
                 }
             }
 
@@ -74,15 +100,37 @@ public class MedNames {
 
     public static void addMed(String med, String salt) {
         try {
-            CSVReader reader2 = new CSVReader(new InputStreamReader(MedNames.class.getClassLoader().getResourceAsStream("meddb.csv")));
+            CSVReader reader2 = new CSVReader(new FileReader(getOrCreateMedDB()));
             List<String[]> allElements = reader2.readAll();
             allElements.add(new String[]{"", med, "", "", "", "", "", salt, ""});
-            CSVWriter writr = new CSVWriter(new FileWriter("src/main/resources/meddb.csv"));
+            CSVWriter writr = new CSVWriter(new FileWriter(getOrCreateMedDB()));
             writr.writeAll(allElements);
             writr.flush();
             writr.close();
         } catch (IOException e) {
-
+            System.out.println("What the fuck bro");
         }
     }
+
+    public static File getOrCreateMedDB() throws IOException {
+        String userHome = System.getProperty("user.home");
+        File dataFolder = new File(userHome, "MedNames/database");
+
+        if (!dataFolder.exists()) {
+            dataFolder.mkdirs();
+        }
+
+        File medFile = new File(dataFolder, "meddb.csv");
+
+        if (!medFile.exists()) {
+            try (InputStream in = MedNames.class.getClassLoader().getResourceAsStream("meddb.csv")) {
+                if (in == null) throw new FileNotFoundException("Default meddb.csv not found in JAR!");
+                Files.copy(in, medFile.toPath());
+            }
+        }
+
+        return medFile;
+    }
+
+
 }

@@ -14,7 +14,7 @@ public class Window extends JFrame {
     JTextArea results;
     JScrollPane scrollPane;
     Timer debounceTimer;
-    JButton addMedicine;
+    JButton addMedicine, searchMode;
 
     public Window() {
         initGUI();
@@ -22,10 +22,10 @@ public class Window extends JFrame {
 
     private void initGUI() {
         setVisible(true);
-        //setResizable(false);
+        setResizable(false);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(0,0,711,400);
-        setTitle("MedNames");
+        setTitle("MedNames - by Vatsal Khanka");
         setIconImage(new ImageIcon(getClass().getClassLoader().getResource("icon.png")).getImage());
 
         inputArea = new JTextField();
@@ -48,25 +48,9 @@ public class Window extends JFrame {
             }
         };
 
-        panel.add(inputArea);
-
-        setFocusable(true);
-        setFocusTraversalKeysEnabled(false);
-
-        scrollPane = new JScrollPane(results);
-        getContentPane().add(scrollPane);
-        results.setOpaque(false);
-        scrollPane.getViewport().setOpaque(false);
-        scrollPane.setOpaque(false);
-        panel.add(scrollPane);
-
-        add(panel);
-        setVisible(true);
-
         addMedicine = new JButton();
-        addMedicine.setText("Add new medicine");
-        add(addMedicine, BorderLayout.WEST);
-        addMedicine.setSize(100, 30);
+        addMedicine.setText("Add new");
+        addMedicine.setSize(100, 25);
         addMedicine.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -83,6 +67,49 @@ public class Window extends JFrame {
                 }
             }
         });
+
+        addMedicine.setAlignmentX(FlowLayout.LEFT);
+        panel.add(addMedicine, FlowLayout.LEFT);
+
+        panel.add(inputArea);
+
+        searchMode = new JButton();
+        searchMode.setText("Generic");
+        searchMode.setSize(100, 25);
+        searchMode.setAlignmentY(0);
+        panel.add(searchMode);
+
+        searchMode.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                switch(MedNames.SEARCH_MODE){
+                    case MedNames.BRAND_TO_GEN:
+                        MedNames.SEARCH_MODE = MedNames.GEN_TO_BRAND;
+                        searchMode.setText("Branded");
+                        break;
+
+                    case MedNames.GEN_TO_BRAND:
+                        MedNames.SEARCH_MODE = MedNames.BRAND_TO_GEN;
+                        searchMode.setText("Generic");
+                        break;
+                }
+            }
+        });
+
+        setFocusable(true);
+        setFocusTraversalKeysEnabled(false);
+
+        scrollPane = new JScrollPane(results);
+        getContentPane().add(scrollPane);
+        results.setOpaque(false);
+        scrollPane.getViewport().setOpaque(false);
+        scrollPane.setOpaque(false);
+        panel.add(scrollPane);
+
+        ((FlowLayout) panel.getLayout()).setHgap(65);
+
+        add(panel);
+        setVisible(true);
 
         debounceTimer = new Timer(1000, new ActionListener() {
             @Override

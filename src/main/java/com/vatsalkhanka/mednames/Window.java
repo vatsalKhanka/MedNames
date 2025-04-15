@@ -81,7 +81,7 @@ public class Window extends JFrame {
                         "Generic Salts:", salt, info
                 };
 
-                int option = JOptionPane.showConfirmDialog(null, message, "Enter the brand and generic names", JOptionPane.OK_CANCEL_OPTION);
+                int option = JOptionPane.showConfirmDialog(null, message, "Enter the brand and generic names", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, new ImageIcon(getClass().getClassLoader().getResource("newmed.png")));
                 if (option == JOptionPane.OK_OPTION) {
                     MedNames.addMed(med.getText(), salt.getText());
                 }

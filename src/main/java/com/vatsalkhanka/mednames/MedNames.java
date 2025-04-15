@@ -112,7 +112,7 @@ public class MedNames {
             writr.flush();
             writr.close();
         } catch (IOException e) {
-            System.out.println("What the fuck bro");
+            e.printStackTrace();
         }
     }
 
